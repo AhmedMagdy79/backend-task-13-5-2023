@@ -5,8 +5,8 @@ export default async function handler(req, res) {
     try {
         if (req.method === "POST") {
             await dbConnect();
-            const { password, email } = req.body;
-            if (!email || !password) {
+            const { password, email, userName } = req.body;
+            if (!email || !password || !userName) {
                 return res.status(400).json({ message: "data is needed" });
             }
             if (await User.findOne({ email: email })) {
@@ -15,7 +15,11 @@ export default async function handler(req, res) {
                     .json({ message: "this email already exists" });
             }
             let hashedPassword = await bcrypt.hash(password, 10);
-            let user = new User({ email: email, password: hashedPassword });
+            let user = new User({
+                email: email,
+                password: hashedPassword,
+                userName: userName,
+            });
             user = await user.save();
             res.status(200).json({
                 message: "you have been registered successfully",
@@ -28,5 +32,3 @@ export default async function handler(req, res) {
         res.status(500).json({ message: "an error occurred" });
     }
 }
-
-
